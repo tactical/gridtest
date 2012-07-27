@@ -1,10 +1,12 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Vector;
 
 import javax.swing.*;
 
 import javax.swing.JFrame;
+import javax.swing.table.DefaultTableModel;
 
 public class GUI extends JFrame{
 	public GUI() {	
@@ -20,44 +22,35 @@ public class GUI extends JFrame{
 		
 		//Schließverhalten des Fensters
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		window.setLayout(new BorderLayout());
 		
- 
-		//Container für das Eingabefeld
-		final Container cEingabe = getContentPane();
-		cEingabe.setLayout(new BorderLayout());
-				
-			
 	    // Anfang Komponenten für das Eingabefeld
 	    final JTextField eingabeFeld = new JTextField("Eingabe einer Zahl");
-	    final JTable table = new JTable(10,1);
+	    final JTable table = new JTable();
+	    StringTableModel loModel = new StringTableModel();
+	    table.setModel(loModel);
+	    
 	    eingabeFeld.setHorizontalAlignment(eingabeFeld.LEFT);
-	    cEingabe.add(eingabeFeld,BorderLayout.NORTH);
+
 	    eingabeFeld.selectAll();
 	    eingabeFeld.addActionListener(new ActionListener() {
 	    	public void actionPerformed(ActionEvent e) {
-	    		if(eingabeFeld.getText().equals("")) {
-	    			
-	    		} else {
-	    			table.add(eingabeFeld.getText(), cEingabe);
-	    			repaint();
-	    			eingabeFeld.resetKeyboardActions();
-	    			
+	    		if(!eingabeFeld.getText().equals("")) {
+	    			StringTableModel loModel = (StringTableModel)table.getModel();
+	    			loModel.addEingabe(eingabeFeld.getText());
+	    			eingabeFeld.setText("");
 	    		}
-	    		
-	    	 
 	    	}
 	    });
 	    //Füge Eingabefeld zum Frame hinzu
-	   window.add(cEingabe);
+	   window.add(eingabeFeld, BorderLayout.NORTH);
 	    
 	    
 	    JScrollPane scrollPane = new JScrollPane(table);
+	    scrollPane.setLayout(new ScrollPaneLayout());
 	    table.setFillsViewportHeight(true);
-	    window.add(scrollPane, BorderLayout.SOUTH);
-	 
-	    
-	    
-	    
+	    window.add(scrollPane, BorderLayout.CENTER);
+    
 
 	   //Darstellung des Fensters
 	   window.setVisible(true);
@@ -96,7 +89,34 @@ public class GUI extends JFrame{
 		return menulist;
 	}
 	
-	public void paint(Graphics gr) {
+	public class StringTableModel extends DefaultTableModel {
+		private Vector<String> m_aStringLst = new Vector<>();
+
+		public void addEingabe(String pcEingabe)
+		{
+			m_aStringLst.add(pcEingabe);
+			fireTableRowsInserted(m_aStringLst.size()-1, m_aStringLst.size()-1);
+		}
 		
+		public int getRowCount() 
+		{
+			if(m_aStringLst==null)
+				return 0;
+			return m_aStringLst.size();
+		}
+		
+		public String getColumnName(int column) {
+			return "Eingabe";
+		}
+		
+		public int getColumnCount()
+		{
+			return 1;
+		}
+		
+		public Object getValueAt(int pnRow, int pnColumn)
+		{
+			return m_aStringLst.elementAt(pnRow);
+		}
 	}
 }
